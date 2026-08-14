@@ -15,6 +15,9 @@ export interface BugReport {
     url: string;
     status?: number;
     statusText?: string;
+    /** The parsed JSON response body of the failing call, if any — the
+     * server's own error message, not just the HTTP status line. */
+    responseBody?: unknown;
   };
   errorMessage?: string;
   expected: string;
@@ -169,6 +172,7 @@ export function generateBugReport(events: RecorderEvent[]): BugReport {
           url: failingApi.url,
           status: failingApi.status,
           statusText: failingApi.statusText,
+          responseBody: failingApi.responseBody,
         }
       : undefined,
     errorMessage: errorEvent?.message,
@@ -193,6 +197,17 @@ function formatStateBlock(state: Record<string, unknown>): string[] {
   return Object.entries(state).map(([key, value]) => `${key} = ${formatValue(value)}`);
 }
 
+/** Pretty-printed JSON for the failing call's response body, or `undefined`
+ * if there's nothing to show (no body, or it wasn't JSON). */
+function formatResponseBody(responseBody: unknown): string | undefined {
+  if (responseBody === undefined) return undefined;
+  try {
+    return JSON.stringify(responseBody, null, 2);
+  } catch {
+    return String(responseBody);
+  }
+}
+
 /** GitHub-flavored Markdown — used by "Copy to GitHub Issue". */
 export function formatAsGitHubMarkdown(report: BugReport, title = "Bug Report"): string {
   const lines: string[] = [`## ${title}`, "", `**Page:** \`${report.page}\``, ""];
@@ -207,6 +222,14 @@ export function formatAsGitHubMarkdown(report: BugReport, title = "Bug Report"):
 
   if (report.api) {
     lines.push("### API", "", "```", `${report.api.method} ${report.api.url}`, "```", "");
+
+    const responseText = formatResponseBody(report.api.responseBody);
+    if (responseText) {
+      const statusLine = `${report.api.status ?? ""} ${report.api.statusText ?? ""}`.trim();
+      lines.push("### Response", "");
+      if (statusLine) lines.push(`**Status:** ${statusLine}`, "");
+      lines.push("```json", responseText, "```", "");
+    }
   }
 
   lines.push("### Expected", "", report.expected, "");
@@ -250,6 +273,14 @@ export function formatAsJiraMarkup(report: BugReport, title = "Bug Report"): str
 
   if (report.api) {
     lines.push("h3. API", "{code}" + `${report.api.method} ${report.api.url}` + "{code}", "");
+
+    const responseText = formatResponseBody(report.api.responseBody);
+    if (responseText) {
+      const statusLine = `${report.api.status ?? ""} ${report.api.statusText ?? ""}`.trim();
+      lines.push("h3. Response");
+      if (statusLine) lines.push(`*Status:* ${statusLine}`);
+      lines.push("{code:json}", responseText, "{code}", "");
+    }
   }
 
   lines.push("h3. Expected", report.expected, "");

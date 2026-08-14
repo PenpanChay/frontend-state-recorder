@@ -71,11 +71,17 @@ Sample output:
 ### API
 POST /api/shipping
 
+### Response
+**Status:** 400 Bad Request
+{
+  "error": "Invalid city \"Chiang Mai\" for United States."
+}
+
 ### Expected
 POST /api/shipping should return a successful response.
 
 ### Actual
-POST /api/shipping returned 400 Invalid city "Chiang Mai" for United States.
+POST /api/shipping returned 400 Bad Request
 
 ### State before
 country = "Thailand"
@@ -88,13 +94,18 @@ city = "Chiang Mai"
 loading = false
 ```
 
+Note the report includes a **Response** section with the API's actual
+JSON response body (not just the HTTP status) whenever the failing call
+returned one — the server's own error message, exactly as it came back,
+not just "it failed." It also captures field order (City before
+Country) — that's the entire bug, and a plain "it failed" report would
+never surface it.
+
 One-click **Copy to GitHub Issue** / **Copy to Jira** buttons, a
 **Download Report** button (saves the formatted report above as a
 `.txt` file — handy when clipboard access is blocked, or to attach the
 file directly to a ticket/email), and **Export JSON** for the raw
-timeline. Note the report captures field order (City before Country) —
-that's the entire bug, and a plain "it failed" report would never
-surface it.
+timeline.
 
 ## Reusing this in another project
 

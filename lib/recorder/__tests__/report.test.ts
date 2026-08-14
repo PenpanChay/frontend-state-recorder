@@ -75,6 +75,31 @@ describe("generateBugReport", () => {
     expect(report.actual).toContain("500");
   });
 
+  it("carries the failing call's response body through to the report", () => {
+    const report = generateBugReport(demoTimeline());
+    expect(report.api?.responseBody).toEqual({ error: "Internal Server Error" });
+  });
+
+  it("leaves responseBody undefined when the failure has no JSON body", () => {
+    const events: RecorderEvent[] = [
+      { id: "1", timestamp: 0, type: "action", action: "click", target: "Save" },
+      {
+        id: "2",
+        timestamp: 100,
+        type: "api",
+        phase: "response",
+        callId: "api_1",
+        method: "POST",
+        url: "/api/save",
+        status: 500,
+        statusText: "Internal Server Error",
+        ok: false,
+      },
+    ];
+    const report = generateBugReport(events);
+    expect(report.api?.responseBody).toBeUndefined();
+  });
+
   it("reconstructs state right before the failure and the final state after", () => {
     const report = generateBugReport(demoTimeline());
     expect(report.stateBefore).toEqual({ name: "Somchai", loading: true });
@@ -122,12 +147,46 @@ describe("formatAsGitHubMarkdown / formatAsJiraMarkup", () => {
     expect(md).toContain("500");
   });
 
+  it("GitHub format includes the failing call's response body under a Response heading", () => {
+    const md = formatAsGitHubMarkdown(report);
+    expect(md).toContain("### Response");
+    expect(md).toContain("**Status:** 500 Internal Server Error");
+    expect(md).toContain('"error": "Internal Server Error"');
+  });
+
   it("Jira format uses wiki markup instead of GitHub markdown", () => {
     const jira = formatAsJiraMarkup(report);
     expect(jira).toContain("h2.");
     expect(jira).toContain("h3. Steps to Reproduce");
     expect(jira).toContain("{code}");
     expect(jira).not.toContain("###");
+  });
+
+  it("Jira format includes the failing call's response body under a Response heading", () => {
+    const jira = formatAsJiraMarkup(report);
+    expect(jira).toContain("h3. Response");
+    expect(jira).toContain("*Status:* 500 Internal Server Error");
+    expect(jira).toContain('"error": "Internal Server Error"');
+  });
+
+  it("omits the Response section entirely when there's no response body to show", () => {
+    const noBodyReport = generateBugReport([
+      { id: "1", timestamp: 0, type: "action", action: "click", target: "Save" },
+      {
+        id: "2",
+        timestamp: 100,
+        type: "api",
+        phase: "response",
+        callId: "api_1",
+        method: "POST",
+        url: "/api/save",
+        status: 500,
+        statusText: "Internal Server Error",
+        ok: false,
+      },
+    ]);
+    expect(formatAsGitHubMarkdown(noBodyReport)).not.toContain("### Response");
+    expect(formatAsJiraMarkup(noBodyReport)).not.toContain("h3. Response");
   });
 });
 
