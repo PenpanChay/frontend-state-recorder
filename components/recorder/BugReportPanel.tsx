@@ -31,6 +31,16 @@ export function BugReportPanel({ events }: { events: RecorderEvent[] }) {
     }
   }
 
+  function handleDownload() {
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `bug-report-${format}-${Date.now()}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   if (events.length === 0) {
     return (
       <div className="fsr-empty">
@@ -63,9 +73,19 @@ export function BugReportPanel({ events }: { events: RecorderEvent[] }) {
 
       <pre className="fsr-report-text">{text}</pre>
 
-      <button type="button" onClick={handleCopy} className="fsr-copy-btn">
-        {copied ? "Copied!" : format === "github" ? "Copy to GitHub Issue" : "Copy to Jira"}
-      </button>
+      <div className="fsr-actions-row">
+        <button type="button" onClick={handleCopy} className="fsr-btn fsr-btn--primary">
+          {copied ? "Copied!" : format === "github" ? "Copy to GitHub Issue" : "Copy to Jira"}
+        </button>
+        <button
+          type="button"
+          onClick={handleDownload}
+          title="Download this report as a .txt file"
+          className="fsr-btn fsr-btn--secondary"
+        >
+          Download Report
+        </button>
+      </div>
     </div>
   );
 }

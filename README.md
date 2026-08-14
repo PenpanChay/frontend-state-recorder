@@ -88,10 +88,13 @@ city = "Chiang Mai"
 loading = false
 ```
 
-One-click **Copy to GitHub Issue** / **Copy to Jira** buttons, and
-**Export JSON** for the raw timeline. Note the report captures field
-order (City before Country) — that's the entire bug, and a plain "it
-failed" report would never surface it.
+One-click **Copy to GitHub Issue** / **Copy to Jira** buttons, a
+**Download Report** button (saves the formatted report above as a
+`.txt` file — handy when clipboard access is blocked, or to attach the
+file directly to a ticket/email), and **Export JSON** for the raw
+timeline. Note the report captures field order (City before Country) —
+that's the entire bug, and a plain "it failed" report would never
+surface it.
 
 ## Reusing this in another project
 
