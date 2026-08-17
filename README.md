@@ -66,19 +66,16 @@ the recorder is for.
 ## Recording a bug here
 
 This app has no built-in "Record a Bug" button and no bookmarklet build of
-its own — build and host the bookmarklet from `state-recorder-sdk`
-instead (see that repo's README for the exact steps); it works against
-*any* running site, this demo included:
+its own — build it from `state-recorder-sdk` instead (see that repo's
+README for details); it works against *any* running site, this demo
+included, with no hosting step needed:
 
-1. In `state-recorder-sdk`: `npm run build:bookmarklet`, then host
-   `dist/recorder-standalone.js` somewhere reachable over HTTP (its own
-   `npm run dev`, or any static host).
-2. Open `state-recorder-sdk/bookmarklet/bookmarklet.html` **as a local
-   file** (e.g. `open` it from a terminal, or double-click it) — it's a
-   static page, not something this or any dev server routes, so a
-   `localhost:3000/...` URL for it will 404. Point the base URL at
-   wherever you hosted the script in step 1, then drag the
-   **⏺ Record a Bug** button into your bookmarks bar.
+1. In `state-recorder-sdk`: `npm install`, then
+   `npm run build:bookmarklet` — produces `dist/bookmarklet.html`.
+2. Open that file **as a local file** (e.g. `open dist/bookmarklet.html`
+   from a terminal, or double-click it) — it's a static page, not
+   something any dev server routes, so a `localhost:3000/...` URL for it
+   will 404. Drag the **⏺ Record a Bug** button into your bookmarks bar.
 3. Run this demo (`npm run dev`, `http://localhost:3000`) and click the
    bookmarklet — the widget appears on the page.
 4. Click **Start Recording**.
