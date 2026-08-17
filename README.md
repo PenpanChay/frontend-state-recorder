@@ -9,12 +9,12 @@ into a precise bug reproduction report. It closes this gap:
 > Dev: "What did you click? What did you type?"
 
 This app itself ships with **zero recorder-related code** — no widget
-mounted, no tracking hooks, nothing in `package.json`'s runtime
-dependencies. To record a session against it, you inject the recorder from
-the outside using the **bookmarklet** (see "Recording a bug here" below).
+mounted, no tracking hooks, not even a devDependency on the SDK. To record
+a session against it, you inject the recorder from the outside using
+**`state-recorder-sdk`'s bookmarklet** (see "Recording a bug here" below).
 That's a deliberate choice: it proves the tool works on a target project
-that was never written with it in mind, the same way it'd work on any
-other site.
+that was never written with it in mind — no code, no dependency, nothing
+committed here — the same way it'd work on any other site.
 
 ## This repo vs. the SDK
 
@@ -36,9 +36,8 @@ bookmarklet.
 - **Tailwind CSS v4** — styling only
 - No backend, database, or external service — the shipping "API" is a
   local Next.js route handler
-- `state-recorder-sdk` is a **devDependency only**, used solely to build
-  the local copy of the bookmarklet script (see below) — it is never
-  imported by the app's own runtime code
+- No dependency on `state-recorder-sdk` at all — see "Recording a bug
+  here" below for how the two projects connect without one
 
 ## Setup
 
@@ -66,24 +65,24 @@ the recorder is for.
 
 ## Recording a bug here
 
-This app has no built-in "Record a Bug" button — use the
-**state-recorder-sdk bookmarklet** instead, which requires no code in this
-project at all:
+This app has no built-in "Record a Bug" button and no bookmarklet build of
+its own — build and host the bookmarklet from `state-recorder-sdk`
+instead (see that repo's README for the exact steps); it works against
+*any* running site, this demo included:
 
-```bash
-npm run build:bookmarklet   # bundles state-recorder-sdk's bookmarklet -> public/recorder-standalone.js
-npm run dev                  # serves it at http://localhost:3000/recorder-standalone.js
-```
-
-Then open `bookmarklet/bookmarklet.html` in a browser, drag the
-**⏺ Record a Bug** button into your bookmarks bar, open
-`http://localhost:3000`, and click the bookmarklet. Then:
-
-1. Click **Start Recording**.
-2. Pick a City (e.g. Chiang Mai), *then* change Country (e.g. United
+1. In `state-recorder-sdk`: `npm run build:bookmarklet`, then host
+   `dist/recorder-standalone.js` somewhere reachable over HTTP (its own
+   `npm run dev`, or any static host).
+2. Open `state-recorder-sdk/bookmarklet/bookmarklet.html`, point the base
+   URL at wherever you hosted the script in step 1, then drag the
+   **⏺ Record a Bug** button into your bookmarks bar.
+3. Run this demo (`npm run dev`, `http://localhost:3000`) and click the
+   bookmarklet — the widget appears on the page.
+4. Click **Start Recording**.
+5. Pick a City (e.g. Chiang Mai), *then* change Country (e.g. United
    States), then click **Save Address** — it fails with a generic modal,
    but the recorder captures the real API response.
-3. Click **Stop Recording**, then open the **Bug Report** tab.
+6. Click **Stop Recording**, then open the **Bug Report** tab.
 
 Sample output:
 
