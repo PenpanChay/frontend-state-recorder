@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTrackedState } from "@/lib/hooks/useTrackedState";
+import { useTrackedState } from "state-recorder-sdk/lib/hooks/useTrackedState";
 import { CITY_OPTIONS, COUNTRIES, type Country } from "./countries";
 import { ErrorModal } from "./ErrorModal";
 
