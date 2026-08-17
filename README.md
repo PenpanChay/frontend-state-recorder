@@ -73,8 +73,11 @@ instead (see that repo's README for the exact steps); it works against
 1. In `state-recorder-sdk`: `npm run build:bookmarklet`, then host
    `dist/recorder-standalone.js` somewhere reachable over HTTP (its own
    `npm run dev`, or any static host).
-2. Open `state-recorder-sdk/bookmarklet/bookmarklet.html`, point the base
-   URL at wherever you hosted the script in step 1, then drag the
+2. Open `state-recorder-sdk/bookmarklet/bookmarklet.html` **as a local
+   file** (e.g. `open` it from a terminal, or double-click it) — it's a
+   static page, not something this or any dev server routes, so a
+   `localhost:3000/...` URL for it will 404. Point the base URL at
+   wherever you hosted the script in step 1, then drag the
    **⏺ Record a Bug** button into your bookmarks bar.
 3. Run this demo (`npm run dev`, `http://localhost:3000`) and click the
    bookmarklet — the widget appears on the page.
