@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTrackedState } from "state-recorder-sdk/lib/hooks/useTrackedState";
 import { CITY_OPTIONS, COUNTRIES, type Country } from "./countries";
 import { ErrorModal } from "./ErrorModal";
 
@@ -10,7 +9,6 @@ interface FormState {
   country: Country;
   city: string;
   loading: boolean;
-  [key: string]: unknown;
 }
 
 const INITIAL_STATE: FormState = {
@@ -20,30 +18,32 @@ const INITIAL_STATE: FormState = {
 };
 
 /**
- * The demo app: a Shipping Address form wired to the Recorder SDK via
- * `useTrackedState`, and to a real validation bug — changing Country never
- * resets City, so a stale City value from before the Country change can get
- * submitted alongside it (see app/api/shipping/route.ts). Order-dependent,
- * 100% deterministic: a dev who habitually tests "country first" will never
- * see it locally, while QA (or a real user correcting a mis-picked country)
+ * The demo app: a plain Shipping Address form (no recorder integration —
+ * this project ships with zero recorder-related code; see the README's
+ * "Recording a bug here" section for the bookmarklet-based alternative)
+ * with a real validation bug — changing Country never resets City, so a
+ * stale City value from before the Country change can get submitted
+ * alongside it (see app/api/shipping/route.ts). Order-dependent, 100%
+ * deterministic: a dev who habitually tests "country first" will never see
+ * it locally, while QA (or a real user correcting a mis-picked country)
  * hits it every time.
  */
 export function ShippingForm() {
   const router = useRouter();
-  const [form, update] = useTrackedState<FormState>("shippingForm", INITIAL_STATE);
+  const [form, setForm] = useState<FormState>(INITIAL_STATE);
   const [showErrorModal, setShowErrorModal] = useState(false);
 
   function handleCountryChange(country: Country) {
-    update({ country });
+    setForm((prev) => ({ ...prev, country }));
   }
 
   function handleCityChange(city: string) {
-    update({ city });
+    setForm((prev) => ({ ...prev, city }));
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    update({ loading: true });
+    setForm((prev) => ({ ...prev, loading: true }));
 
     try {
       const response = await fetch("/api/shipping", {
@@ -57,15 +57,15 @@ export function ShippingForm() {
         // API's validation message (e.g. which city/country combo was
         // invalid) is useful for a recorder/log to capture, but not
         // something the end user needs to see.
-        update({ loading: false });
+        setForm((prev) => ({ ...prev, loading: false }));
         setShowErrorModal(true);
         return;
       }
 
-      update({ loading: false });
+      setForm((prev) => ({ ...prev, loading: false }));
       router.push("/success");
     } catch {
-      update({ loading: false });
+      setForm((prev) => ({ ...prev, loading: false }));
       setShowErrorModal(true);
     }
   }

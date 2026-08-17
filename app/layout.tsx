@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { RecorderWidget } from "state-recorder-sdk/components/recorder/RecorderWidget";
 
 export const metadata: Metadata = {
-  title: "Frontend State Recorder",
+  title: "Frontend State Recorder — Demo",
   description:
-    "Record user actions, state changes, and API calls, then generate a precise bug reproduction report.",
+    "A plain demo app with a real, order-dependent bug. Record it with the state-recorder-sdk bookmarklet — nothing recorder-related runs in this app itself.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -13,12 +12,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className="h-full antialiased">
       <body className="flex min-h-full flex-col font-sans">
         {children}
-        {/* Mounted once, globally, so recording survives client-side
-         * navigation between pages of the app being recorded. The widget
-         * itself calls recorder.init() on mount — no separate route
-         * tracker needed, since navigation is captured via a history.
-         * pushState/popstate patch inside the SDK (framework-agnostic). */}
-        <RecorderWidget />
+        {/* No recorder widget mounted here on purpose — this app ships
+         * with zero recorder integration. To record a session against it,
+         * use the state-recorder-sdk bookmarklet (see bookmarklet/ and
+         * the README's "Recording a bug here" section) instead. */}
       </body>
     </html>
   );
