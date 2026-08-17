@@ -134,7 +134,51 @@ keys get logged. Non-React apps can still use `lib/recorder/` directly
 (`recorder.init()`, `recorder.trackState`/`trackAction`) but need their
 own dashboard UI, since `components/recorder/` is React-specific.
 
+## Bookmarklet (works on any site — zero integration)
+
+Everything above still requires adding *something* to the target
+project's source. `bookmarklet/` goes one step further: a **vanilla-DOM
+build with no React, no build-time integration at all** — a QA tester can
+drop a bookmark into their bookmarks bar and click it on **any website**
+(production, staging, a competitor's site, whatever they were about to
+test by hand) to start recording, with nothing committed to that site's
+codebase.
+
+```bash
+npm run build:bookmarklet   # bundles bookmarklet/src/* -> public/recorder-standalone.js
+npm run dev                  # serves it at http://localhost:3000/recorder-standalone.js
+```
+
+Then open `bookmarklet/bookmarklet.html` in a browser, drag the
+**⏺ Record a Bug** button into your bookmarks bar, and click it on any
+open tab. It renders the exact same widget (same CSS, same tabs, same Bug
+Report/Download/Export flow) — `bookmarklet/src/panel.ts` is a
+hand-written DOM twin of `components/recorder/RecorderWidget.tsx`, built
+because a bookmarklet has to work on pages with no React at all. It reuses
+`lib/recorder/*` completely unchanged.
+
+Verified end-to-end with a headless-browser check: injecting the built
+script cross-origin into a bare page with zero recorder code, starting a
+recording, triggering a failing API call, and confirming the generated Bug
+Report (including the Response section) and Download Report button both
+work correctly, with the widget refusing to double-mount if the
+bookmarklet is clicked twice on the same page.
+
+**Trade-off to know:** the *dashboard* is fully standalone this way, but
+the *instrumentation* (patching `fetch`/clicks/errors) is a browser
+constraint — it still has to run inside the target page's own JavaScript
+context once injected. A site with a strict Content-Security-Policy may
+block the injected `<script>` tag; a browser extension (content script)
+is the more robust alternative there, at the cost of extra setup
+(`manifest.json`, packaging).
+
 ## Tests
+
+`bookmarklet/src/panel.ts` is presentational (a DOM twin of
+`RecorderWidget.tsx`, which also has no unit tests of its own) — it's
+exercised via the headless-browser check above rather than Vitest, and it
+imports `lib/recorder/*` completely unchanged, so the logic it depends on
+is covered by the suite below regardless.
 
 `lib/recorder/__tests__/` covers the store, the `trackState` diffing
 logic, and the report generator against the demo scenario above.
