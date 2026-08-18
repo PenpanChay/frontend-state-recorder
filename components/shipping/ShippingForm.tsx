@@ -108,8 +108,7 @@ export function ShippingForm() {
   }
 
   return (
-    <>
-      <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white shadow-xl shadow-zinc-900/5 dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-none">
+    <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white shadow-xl shadow-zinc-900/5 dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-none">
         <div className="flex items-center gap-3 border-b border-zinc-100 px-6 py-5 dark:border-zinc-900">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-lg dark:bg-zinc-50">
             📦
@@ -167,8 +166,5 @@ export function ShippingForm() {
           </button>
         </form>
       </div>
-
-      {showErrorModal && <ErrorModal onClose={() => setShowErrorModal(false)} />}
-    </>
   );
 }
