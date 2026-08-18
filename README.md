@@ -152,3 +152,25 @@ code to test. `state-recorder-sdk` covers the store, the `trackState`
 diffing logic, and the report generator (`npm run test` there); this
 repo's own `npm run build` + `npm run lint` are enough to confirm the demo
 itself still works.
+
+## Console issues for testing scanners
+
+This app also intentionally logs a few real (not mocked) console
+issues as soon as the page loads, so it can double as a target for a
+console-scanning tool (e.g. `console-warning-collector-web`) instead of
+only that tool's own bundled demo pages:
+
+- A broken `<img>` (`/brand/company-logo.png` doesn't exist under
+  `public/`) — a 404 plus the browser's own "Failed to load resource" log.
+- `console.warn` on mount: a deprecation-style notice about the (fictional)
+  legacy field-tracking listener.
+- A `fetch("/api/shipping-analytics")` call on mount — that route doesn't
+  exist, so it 404s and is logged via `console.error`.
+- An uncaught exception on mount (`Cannot read properties of null`) from
+  reading `.dataset` off an element that's never rendered on this page.
+
+None of this touches the real Country/City bug above, the shipping API, or
+the recorder bookmarklet flow — it's additive, always fires on page load
+without any interaction, and is there purely so a console/network scanner
+has real (if intentionally injected) issues to find on a "real" app instead
+of a purpose-built demo page.

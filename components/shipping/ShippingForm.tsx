@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CITY_OPTIONS, COUNTRIES, type Country } from "./countries";
 import { ErrorModal } from "./ErrorModal";
@@ -32,6 +32,36 @@ export function ShippingForm() {
   const router = useRouter();
   const [form, setForm] = useState<FormState>(INITIAL_STATE);
   const [showErrorModal, setShowErrorModal] = useState(false);
+
+  // Intentional console issues for testing scanners (see README "Console
+  // issues for testing scanners"). None of this affects the real
+  // Country/City bug above or the recorder demo — it only adds realistic
+  // console noise that fires as soon as the page loads, so a tool like
+  // console-warning-collector-web has something real to catch without
+  // needing to drive the form first.
+  useEffect(() => {
+    console.warn(
+      "[frontend-state-recorder] Legacy field-tracking listener is deprecated; migrate to state-recorder-sdk's useTrackedState instead.",
+    );
+
+    fetch("/api/shipping-analytics").then((response) => {
+      if (!response.ok) {
+        console.error(
+          `[frontend-state-recorder] Failed to record page-view analytics: HTTP ${response.status}`,
+        );
+      }
+    });
+
+    const timer = setTimeout(() => {
+      // shipping-metrics-panel is never rendered on this page — reading
+      // .dataset off the missing element throws, producing a real,
+      // uncaught pageerror.
+      const panel = document.getElementById("shipping-metrics-panel");
+      panel!.dataset.ready = "true";
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   function handleCountryChange(country: Country) {
     setForm((prev) => ({ ...prev, country }));
