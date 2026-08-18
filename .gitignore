@@ -53,3 +53,7 @@ CLAUDE.md
 
 # build artifact — regenerate with `npm run build:bookmarklet`
 /public/recorder-standalone.js
+
+# scratch space used when working around locked/undeletable files
+# on some remote filesystems - never meant to be committed
+/_to_delete/
