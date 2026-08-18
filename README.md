@@ -174,3 +174,19 @@ the recorder bookmarklet flow — it's additive, always fires on page load
 without any interaction, and is there purely so a console/network scanner
 has real (if intentionally injected) issues to find on a "real" app instead
 of a purpose-built demo page.
+
+**Scanning this with `npm run dev` running:** Next.js's own dev-mode error
+overlay (the small pill in the corner of the page, e.g. "2 Issues") will
+also show up, since it surfaces any runtime error it sees — this can't be
+turned off via `next.config.ts` while real errors exist (`devIndicators:
+false` only hides the cosmetic route-type badge, not error reporting). It
+doesn't affect what a scanner reads — the underlying `console.warn` /
+`console.error` / uncaught-exception events fire identically either way —
+it's just visual noise in the browser itself. To scan this app without
+that overlay present at all, run it as a production build instead, which
+never injects the dev overlay in the first place:
+
+```bash
+npm run build
+npm run start
+```

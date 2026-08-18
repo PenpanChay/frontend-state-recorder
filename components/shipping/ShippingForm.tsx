@@ -44,12 +44,19 @@ export function ShippingForm() {
       "[frontend-state-recorder] Legacy field-tracking listener is deprecated; migrate to state-recorder-sdk's useTrackedState instead.",
     );
 
-    fetch("/api/shipping-analytics").then((response) => {
+    fetch("/api/shipping-analytics").then(async (response) => {
       if (!response.ok) {
         console.error(
           `[frontend-state-recorder] Failed to record page-view analytics: HTTP ${response.status}`,
         );
       }
+      // Drain the body even though only the status is needed. Next.js's
+      // 404 response here is a full streamed React payload, not a tiny
+      // plain 404 - an unread body can leave the request looking "still
+      // in flight" to a headless browser waiting for network-idle (e.g.
+      // console-warning-collector-web's scanner), causing it to hang
+      // until its navigation timeout.
+      await response.text().catch(() => {});
     });
 
     const timer = setTimeout(() => {
