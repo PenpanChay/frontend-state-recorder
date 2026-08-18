@@ -33,12 +33,12 @@ export function ShippingForm() {
   const [form, setForm] = useState<FormState>(INITIAL_STATE);
   const [showErrorModal, setShowErrorModal] = useState(false);
 
-  // Intentional console issues for testing scanners (see README "Console
-  // issues for testing scanners"). None of this affects the real
-  // Country/City bug above or the recorder demo — it only adds realistic
-  // console noise that fires as soon as the page loads, so a tool like
-  // console-warning-collector-web has something real to catch without
-  // needing to drive the form first.
+  // Console noise for testing scanners (see README "Console issues for
+  // testing scanners"). The deprecation-style console.warn below is still
+  // an intentional fixture. The page-view analytics call and the
+  // shipping-metrics-panel access used to be broken on purpose too (a 404
+  // and an uncaught TypeError) — they're now wired up for real instead:
+  // /api/shipping-analytics exists, and the panel lookup is null-guarded.
   useEffect(() => {
     console.warn(
       "[frontend-state-recorder] Legacy field-tracking listener is deprecated; migrate to state-recorder-sdk's useTrackedState instead.",
@@ -50,21 +50,20 @@ export function ShippingForm() {
           `[frontend-state-recorder] Failed to record page-view analytics: HTTP ${response.status}`,
         );
       }
-      // Drain the body even though only the status is needed. Next.js's
-      // 404 response here is a full streamed React payload, not a tiny
-      // plain 404 - an unread body can leave the request looking "still
-      // in flight" to a headless browser waiting for network-idle (e.g.
-      // console-warning-collector-web's scanner), causing it to hang
-      // until its navigation timeout.
+      // Drain the body so this fetch doesn't look "still in flight" to a
+      // headless browser waiting for network-idle (e.g.
+      // console-warning-collector-web's scanner), which could otherwise
+      // hang until its navigation timeout.
       await response.text().catch(() => {});
     });
 
     const timer = setTimeout(() => {
-      // shipping-metrics-panel is never rendered on this page — reading
-      // .dataset off the missing element throws, producing a real,
-      // uncaught pageerror.
+      // shipping-metrics-panel is never rendered on this page, so guard
+      // against a null element instead of asserting it's always there.
       const panel = document.getElementById("shipping-metrics-panel");
-      panel!.dataset.ready = "true";
+      if (panel) {
+        panel.dataset.ready = "true";
+      }
     }, 300);
 
     return () => clearTimeout(timer);
@@ -108,7 +107,8 @@ export function ShippingForm() {
   }
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white shadow-xl shadow-zinc-900/5 dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-none">
+    <>
+      <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white shadow-xl shadow-zinc-900/5 dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-none">
         <div className="flex items-center gap-3 border-b border-zinc-100 px-6 py-5 dark:border-zinc-900">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-lg dark:bg-zinc-50">
             📦
@@ -166,5 +166,7 @@ export function ShippingForm() {
           </button>
         </form>
       </div>
+      {showErrorModal && <ErrorModal onClose={() => setShowErrorModal(false)} />}
+    </>
   );
 }
